@@ -32,7 +32,7 @@ mp.set_start_method('spawn', force=True)
 from vision_processes import forward, finish_all_consumers  # This import loads all the models. May take a while
 from image_patch import *
 from video_segment import *
-from datasets.dataset import MyDataset
+from datasets.my_dataset import MyDataset
 
 console = Console(highlight=False, force_terminal=False)
 
@@ -254,6 +254,7 @@ def load_image(path):
 
 def get_code(query):
     model_name_codex = 'codellama' if config.codex.model == 'codellama' else 'codex'
+    print(model_name_codex)
     code = forward(model_name_codex, prompt=query, input_type="image")
     if config.codex.model not in ('gpt-3.5-turbo', 'gpt-4'):
         code = f'def execute_command(image, my_fig, time_wait_between_lines, syntax):' + code # chat models give execute_command due to system behaviour
