@@ -972,11 +972,13 @@ def codex_helper(extended_prompt):
             extended_prompt = [extended_prompt]
         print("come here")
         print(openai.api_key)
+        # print(extended_prompt[0])
         responses = [client.chat.completions.create(
             model=config.codex.model,
             messages=[
                 # {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "system", "content": "Only answer with a function starting def execute_command."},
+                # {"role": "system", "content": "Only answer with a function starting def execute_command."},
+                {"role": "system", "content": "Only answer with a function starting function execute_command."},
                 {"role": "user", "content": prompt}
             ],
             temperature=config.codex.temperature,

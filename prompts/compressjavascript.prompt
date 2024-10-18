@@ -1,0 +1,259 @@
+import math
+
+class ImagePatch{
+    /*
+    A Javascript class containing a crop of an image centered around a particular object, as well as relevant information.
+    Attributes
+    ----------
+    cropped_image
+        An array-like of the cropped image taken from the original image.
+    left, lower, right, upper
+        A number describing the position of the (left/lower/right/upper) border of the crop's bounding box in the original image.
+
+    Methods
+    -------
+    find(object_name)
+        Returns a list of new ImagePatch objects containing crops of the image centered around any objects found in the
+        image matching the object_name.
+    exists(object_name)
+        Returns true if the object specified by object_name is found in the image, and false otherwise.
+    verify_property(property)
+        Returns true if the property is met, and false otherwise.
+    best_text_match(option_list, prefix)
+        Returns the string that best matches the image.
+    simple_query(question)
+        Returns the answer to a basic question asked about the image. If no question is provided, returns the answer to "What is this?".
+    llm_query(question, long_answer)
+        References a large language model (e.g., GPT) to produce a response to the given question. Default is short-form answers, can be made long-form responses with the long_answer flag.
+    compute_depth()
+        Returns the median depth of the image crop.
+    crop(left, lower, right, upper)
+        Returns a new ImagePatch object containing a crop of the image at the given coordinates.
+    */
+
+    constructor(image, left=nil, lower=nil, right=nil, upper=nil)
+        /*
+        Initializes an ImagePatch object by cropping the image at the given coordinates and stores the coordinates as
+        attributes. If no coordinates are provided, the image is left unmodified, and the coordinates are set to the
+        dimensions of the image.
+        Parameters
+        -------
+        image
+            An array-like of the original image.
+        left, lower, right, upper 
+            An int describing the position of the (left/lower/right/upper) border of the crop's bounding box in the original image.
+        */
+        
+
+        find(object_name)
+        /*
+        Returns a list of ImagePatch objects matching object_name contained in the crop if any are found.
+        Otherwise, returns an empty list.
+        Parameters
+        ----------
+        object_name
+            the name of the object to be found
+
+        Returns
+        -------
+       a list of ImagePatch objects matching object_name contained in the crop
+
+        Examples
+        --------
+        >>> # return the foo
+        >>> function execute_command(n){const e=new ImagePatch(n);return e.find("foo")}
+    */
+        
+
+    exists(object_name)
+        /*
+        Returns True if the object specified by object_name is found in the image, and False otherwise.
+        Parameters
+        -------
+        object_name
+            A string describing the name of the object to be found in the image.
+
+        Examples
+        -------
+        >>> # Are there both foos and garply bars in the photo?
+        >>> function execute_command(e){const o=new ImagePatch(e);var t=o.exists("foo"),e=o.exists("garply bar");return bool_to_yesno(t&&e)}
+        */
+
+    verify_property(object_name, visual_property)
+    /*
+        Returns true if the object possesses the visual property, and false otherwise.
+        Differs from 'exists' in that it presupposes the existence of the object specified by object_name, instead checking whether the object possesses the property.
+        Parameters
+        -------
+        object_name
+            A string describing the name of the object to be found in the image.
+        visual_property 
+            A string describing the simple visual property (e.g., color, shape, material) to be checked.
+
+        Examples
+        -------
+        >>> # Do the letters have blue color?
+        >>> function execute_command(e){const t=new ImagePatch(e),n=t.find("letters");return bool_to_yesno(n[0].verify_property("letters","blue"))}
+    */
+
+    best_text_match(option_list, prefix)
+    /*
+        Returns the string that best matches the image.
+        Parameters
+        -------
+        option_list
+            A list with the names of the different options
+        prefix
+            A string with the prefixes to append to the options
+
+        Examples
+        -------
+        >>> # Is the foo gold or white?
+        >>> function execute_command(t){const e=new ImagePatch(t),n=e.find("foo");return n[0].best_text_match(["gold","white"])}
+        
+    */
+
+    simple_query(question)
+    /*
+        Returns the answer to a basic question asked about the image. If no question is provided, returns the answer
+        to "What is this?". The questions are about basic perception, and are not meant to be used for complex reasoning
+        or external knowledge.
+        Parameters
+        -------
+        question
+            A string describing the question to be asked.
+
+        Examples
+        -------
+
+        >>> # Which kind of baz is not fredding?
+        >>> function execute_command(image){const image_patch=new ImagePatch(image);const baz_patches=image_patch.find("baz");for(let baz_patch of baz_patches){if(!baz_patch.verify_property("baz","fredding")){return baz_patch.simple_query("What is this baz?")}}}
+       
+        >>> # What color is the foo?
+        >>> function executeCommand(image){const imagePatch=new ImagePatch(image);const fooPatches=imagePatch.find("foo");const fooPatch=fooPatches[0];return fooPatch.simpleQuery("What is the color?")}
+       
+    */
+
+    compute_depth()
+    /*
+        Returns the median depth of the image crop
+        Parameters
+        ----------
+        Returns
+        -------
+        the median depth of the image crop
+
+        Examples
+        --------
+        >>> // the bar furthest away
+        >>> function execute_command(image){const imagePatch=new ImagePatch(image);let barPatches=imagePatch.find("bar");barPatches.sort((a,b)=>a.computeDepth()-b.computeDepth());return barPatches[barPatches.length-1]}
+      
+    */
+
+    crop(left, lower, right, upper)
+    /*
+        Returns a new ImagePatch cropped from the current ImagePatch.
+        Parameters
+        -------
+        left, lower, right, upper
+            The (left/lower/right/upper)most pixel of the cropped image.
+        -------
+    */
+
+    overlaps_with(left, lower, right, upper)
+    /*
+        Returns true if a crop with the given coordinates overlaps with this one,
+        else false.
+        Parameters
+        ----------
+        left, lower, right, upper
+            the (left/lower/right/upper) border of the crop to be checked
+
+        Returns
+        -------
+        bool
+            true if a crop with the given coordinates overlaps with this one, else false
+
+        Examples
+        --------
+        >>> // black foo on top of the qux
+        >>> function execute_command(image){const imagePatch=new ImagePatch(image);const quxPatches=imagePatch.find("qux");const quxPatch=quxPatches[0];const fooPatches=imagePatch.find("black foo");for(const foo of fooPatches){if(foo.verticalCenter>quxPatch.verticalCenter){return foo}}}   
+
+    */
+
+    llm_query(question, long_answer)
+    /*
+        Answers a text question using GPT-3. The input question is always a formatted string with a variable in it.
+
+        Parameters
+        ----------
+        question
+            the text question to ask. Must not contain any reference to 'the image' or 'the photo', etc.
+        long_answer
+            whether to return a short answer or a long answer. Short answers are one or at most two words, very concise.
+            Long answers are longer, and may be paragraphs and explanations. Defalt is True (so long answer).
+
+        Examples
+        --------
+        // What is the city this building is in?
+        >>> function execute_command(image){let imagePatch=new ImagePatch(image);let buildingPatches=imagePatch.find("building");let buildingPatch=buildingPatches[0];let buildingName=buildingPatch.simpleQuery("What is the name of the building?");return buildingPatch.llmQuery(`What city is ${buildingName} in?`,!1)}
+
+        // Who invented this object?
+        >>> function execute_command(image){let imagePatch=new ImagePatch(image);let objectPatches=imagePatch.find("object");let objectPatch=objectPatches[0];let objectName=objectPatch.simpleQuery("What is the name of the object?");return objectPatch.llmQuery(`Who invented ${objectName}?`,!1)}
+
+        // Explain the history behind this object.
+        >>> function execute_command(image){let imagePatch=new ImagePatch(image);let objectPatches=imagePatch.find("object");let objectPatch=objectPatches[0];let objectName=objectPatch.simpleQuery("What is the name of the object?");return objectPatch.llmQuery(`What is the history behind ${objectName}?`,!0)}
+    */
+
+best_image_match(list_patches, content, return_index)
+/*
+    Returns the patch most likely to contain the content.
+    Parameters
+    ----------
+    list_patches
+    content
+        the object of interest
+    return_index
+        if true, returns the index of the patch most likely to contain the object
+
+    Returns
+    -------
+    int
+        Patch most likely to contain the object
+   
+*/
+
+distance(patch_a, patch_b)
+/*
+    """
+    Returns the distance between the edges of two ImagePatches. If the patches overlap, it returns a negative distance
+    corresponding to the negative intersection over union.
+
+    Parameters
+    ----------
+    patch_a : ImagePatch
+    patch_b : ImagePatch
+
+    Examples
+    --------
+    // Return the qux that is closest to the foo
+    >>> function execute_command(image){const imagePatch=new ImagePatch(image);const quxPatches=imagePatch.find('qux');const fooPatches=imagePatch.find('foo');const fooPatch=fooPatches[0];quxPatches.sort((a,b)=>distance(a,fooPatch)-distance(b,fooPatch));return quxPatches[0]}
+*/
+
+bool_to_yesno(bool_answer)
+    return "yes" if bool_answer else "no"
+
+
+coerce_to_numeric(string)
+    /*
+    This function takes a string as input and returns a float after removing any non-numeric characters.
+    If the input string contains a range (e.g. "10-15"), it returns the first value in the range.
+   */
+}
+Write a function using compressed Javascript and the ImagePatch class (above) that could be executed to provide an answer to the query. Ensure the code is as short and minified as possible, using ES6 syntax, concise variable names, and no comments.
+
+Consider the following guidelines:
+- Use base Javascript (comparison, sorting) for basic logical operations, left/right/up/down, math, etc.
+- Use the llm_query function to access external information and answer informational questions not concerning the image.
+
+Query: INSERT_QUERY_HERE
