@@ -973,12 +973,18 @@ def codex_helper(extended_prompt):
         print("come here")
         print(openai.api_key)
         # print(extended_prompt[0])
+        system_role = {}
+        if config.codex.lang == "python":
+            system_role = {"role": "system", "content": "Only answer with a function starting def execute_command."}
+        elif config.codex.lang == "javascript":
+            system_role = {"role": "system", "content": "Only answer with a function starting function execute_command."}
+
         responses = [client.chat.completions.create(
             model=config.codex.model,
             messages=[
                 # {"role": "system", "content": "You are a helpful assistant."},
                 # {"role": "system", "content": "Only answer with a function starting def execute_command."},
-                {"role": "system", "content": "Only answer with a function starting function execute_command."},
+                system_role,
                 {"role": "user", "content": prompt}
             ],
             temperature=config.codex.temperature,
@@ -1128,7 +1134,7 @@ class CodeLlama(CodexModel):
         # Compute this when the other models have already been loaded
         # Ignore gpu number
         usage_ratio = 0.15  # If it is small, it will use more GPUs, which will allow larger batch sizes
-        leave_empty = 0.7  # If other models are using more than (1-leave_empty) of memory, do not use
+        leave_empty = 0.2  # If other models are using more than (1-leave_empty) of memory, do not use
         max_memory = {}
         for gpu_number in range(torch.cuda.device_count()):
             mem_available = torch.cuda.mem_get_info(f'cuda:{gpu_number}')[0]
@@ -1147,10 +1153,12 @@ class CodeLlama(CodexModel):
         self.model.eval()
 
     def run_codellama(self, prompt):
+   
         input_ids = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)["input_ids"]
         generated_ids = self.model.generate(input_ids.to("cuda"), max_new_tokens=128)
         generated_ids = generated_ids[:, input_ids.shape[-1]:]
         generated_text = [self.tokenizer.decode(gen_id, skip_special_tokens=True) for gen_id in generated_ids]
+        print(generated_text)
         generated_text = [text.split('\n\n')[0] for text in generated_text]
         return generated_text
 

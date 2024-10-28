@@ -18,7 +18,7 @@ class GQADataset(Dataset):
 
     def __init__(self, split, balanced=True, data_path="",
                  image_transforms=None, question_transforms=None, tokenize=None,
-                 verbose=False, testing=False, max_samples=None, first_n=None, return_pil=True):
+                 verbose=False, testing=False, max_samples=None, first_n=None, return_pil=True, **kwargs):
         """
         Args:
             split (str): Data split. One of ["challenge", "submission", "test", "testdev", "train", "val"]

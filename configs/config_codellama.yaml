@@ -1,6 +1,6 @@
 codex:
     model: codellama
-    codellama_model_name: codellama/CodeLlama-7b-Instruct-hf
+    codellama_model_name: codellama/CodeLlama-34b-Instruct-hf
 load_models:
-    codex: False
-    codellama: True
+    codex: True
+    codellama: False

@@ -1,0 +1,7 @@
+codex:
+    prompt: ./prompts/chatapi.prompt                # Codex prompt file, which defines the API. (doesn't support video for now due to token limits)
+    lang: python
+dataset:
+    dataset_name: 'GQA'
+    data_path: '/root/Datasets/'
+    split: 'testdev' 
