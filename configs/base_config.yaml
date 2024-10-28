@@ -58,7 +58,7 @@ codex:
 save: True                                          # Save the results to a file
 save_new_results: True                              # If False, overwrite the results file
 results_dir: ./results/                             # Directory to save the results
-use_cache: True                                     # Use cache for the models that support it (now, GPT-3)
+use_cache: False                                     # Use cache for the models that support it (now, GPT-3)
 clear_cache: False                                  # Clear stored cache
 use_cached_codex: False                             # Use previously-computed Codex results
 cached_codex_path: ''                               # Path to the csv results file from which to load Codex results

@@ -153,12 +153,12 @@ class GQADataset(Dataset):
         outText = ' '.join(outText)
         return outText
 
-    def get_img_path(self, index):
+    def get_sample_path(self, index):
         if "imageId" in self.df.columns:
             image_id = self.df.iloc[index]["imageId"]
         else:
             image_id = self.df.iloc[index]["image_id"]
-        return os.path.expanduser(os.path.join(self.data_path, "../images", f"{image_id}.jpg"))
+        return os.path.expanduser(os.path.join(self.data_path, "./images", f"{image_id}.jpg"))
 
     def get_index_from_sample_id(self, sample_id):
         return np.where(self.df.index == sample_id)[0][0].item()
@@ -202,11 +202,15 @@ class GQADataset(Dataset):
             out_dict = {"sample_id": sample_id, "img": img, "question": question, 'index': index}
             if self.return_pil:
                 out_dict["pil_img"] = pil_img
+            if 'extra_context' not in out_dict:
+                out_dict['extra_context'] = ''
             return out_dict
         else:
-            out_dict = {"sample_id": sample_id, "answer": answer, "img": img, "question": question, 'pil_img': pil_img,
-                        "question_type": question_type, 'index': index, 'possible_answers': [],
+            out_dict = {"sample_id": sample_id, "answer": answer, "img": img, "query": question, 'pil_img': pil_img,
+                        "query_type": question_type, 'index': index, 'possible_answers': [],
                         'info_to_prompt': question}
+            if 'extra_context' not in out_dict:
+                out_dict['extra_context'] = ''
             return out_dict
 
     def post_process(self, prediction, stem=True):
