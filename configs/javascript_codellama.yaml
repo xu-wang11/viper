@@ -1,0 +1,14 @@
+codex:
+    prompt: ./prompts/compressjavascript.prompt                # Codex prompt file, which defines the API. (doesn't support video for now due to token limits)
+    lang: javascript
+    model: codellama                            # Codex model to use. [code-davinci-002, gpt-3.5-turbo, gpt-4]. See openai.Model.list() for available models
+    codellama_model_name: codellama/CodeLlama-7b-Instruct-hf
+dataset:
+    dataset_name: 'GQA'
+    data_path: '/root/Datasets/'
+    split: 'testdev' 
+load_models:                                        # Which pretrained models to load
+    codex: False
+    codellama: True
+
+results_dir: ./javascript_results/  
