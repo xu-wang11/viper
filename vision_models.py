@@ -1156,19 +1156,19 @@ class CodeLlama(CodexModel):
         resp = list()
         for prompt in extended_prompt:
             if config.codex.lang == "python":
-                system_role = {"role": "system", "content": "Only answer with a function starting def execute_command."}
+                system_role = {"role": "system", "content": "You are an expert programmer that helps to write Python code based on the user request, only answer with a function starting def execute_command."}
             elif config.codex.lang == "javascript":
-                system_role = {"role": "system", "content": "Only answer with a function starting function execute_command."}
+                system_role = {"role": "system", "content": "You are an expert programmer that helps to write javascript code based on the user request, only answer with a function starting function execute_command."}
             messages=[system_role, {"role": "user", "content": prompt}]
-            tokenized_chat = self.tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, return_tensors="pt")
+            tokenized_chat = self.tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=False, return_tensors="pt")
 
             # input_ids = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)["input_ids"]
-            input_ids = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False)["input_ids"].to("cuda")
-            generated_ids = self.model.generate(input_ids, max_new_tokens=128)
-            generated_ids = generated_ids[0].to("cpu")
-            #generated_ids = generated_ids[:, input_ids.shape[-1]:]
-            generated_text =  self.tokenizer.decode(generated_ids) # [self.tokenizer.decode(gen_id, skip_special_tokens=True) for gen_id in generated_ids]
-            print(generated_text)
+            # input_ids = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False)["input_ids"].to("cuda")
+            generated_ids = self.model.generate(tokenized_chat, max_new_tokens=512)
+            # generated_ids = generated_ids[0].to("cpu")
+            generated_ids = generated_ids[:, tokenized_chat.shape[-1]:]
+            generated_text =  [self.tokenizer.decode(gen_id, skip_special_tokens=True) for gen_id in generated_ids]
+            print(generated_text[0])
             generated_text = [text.split('\n\n')[0] for text in generated_text]
             resp.append(generated_text)
         return resp
