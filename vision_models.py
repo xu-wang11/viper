@@ -1114,7 +1114,7 @@ class CodeLlama(CodexModel):
     def __init__(self, gpu_number=0):
         super().__init__(gpu_number=gpu_number)
 
-        from transformers import LlamaForCausalLM, CodeLlamaTokenizer
+        from transformers import AutoModelForCausalLM, AutoTokenizer
 
         # Load Llama2
         model_id = config.codex.codellama_model_name
@@ -1127,9 +1127,9 @@ class CodeLlama(CodexModel):
                                 'codellama/CodeLlama-7b-Python-hf', 'codellama/CodeLlama-13b-Python-hf',
                                 'codellama/CodeLlama-34b-Python-hf', 'codellama/CodeLlama-7b-Instruct-hf',
                                 'codellama/CodeLlama-13b-Instruct-hf', 'codellama/CodeLlama-34b-Instruct-hf']
-        self.tokenizer = CodeLlamaTokenizer.from_pretrained(model_id)
-        self.tokenizer.pad_token = self.tokenizer.eos_token
-        self.tokenizer.padding_side = 'left'
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        # self.tokenizer.pad_token = self.tokenizer.eos_token
+        # self.tokenizer.padding_side = 'left'
 
         # Compute this when the other models have already been loaded
         # Ignore gpu number
@@ -1143,7 +1143,7 @@ class CodeLlama(CodexModel):
             max_memory[gpu_number] = mem_available * usage_ratio
             if gpu_number == 0:
                 max_memory[gpu_number] /= 10
-        self.model = LlamaForCausalLM.from_pretrained(
+        self.model = AutoModelForCausalLM.from_pretrained(
             model_id,
             torch_dtype=torch.float16,
             # load_in_8bit=True,  # For some reason this results in OOM when doing forward pass
@@ -1152,15 +1152,26 @@ class CodeLlama(CodexModel):
         )
         self.model.eval()
 
-    def run_codellama(self, prompt):
-   
-        input_ids = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)["input_ids"]
-        generated_ids = self.model.generate(input_ids.to("cuda"), max_new_tokens=128)
-        generated_ids = generated_ids[:, input_ids.shape[-1]:]
-        generated_text = [self.tokenizer.decode(gen_id, skip_special_tokens=True) for gen_id in generated_ids]
-        print(generated_text)
-        generated_text = [text.split('\n\n')[0] for text in generated_text]
-        return generated_text
+    def run_codellama(self, extended_prompt):
+        resp = list()
+        for prompt in extended_prompt:
+            if config.codex.lang == "python":
+                system_role = {"role": "system", "content": "Only answer with a function starting def execute_command."}
+            elif config.codex.lang == "javascript":
+                system_role = {"role": "system", "content": "Only answer with a function starting function execute_command."}
+            messages=[system_role, {"role": "user", "content": prompt}]
+            tokenized_chat = self.tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, return_tensors="pt")
+
+            # input_ids = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)["input_ids"]
+            input_ids = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False)["input_ids"].to("cuda")
+            generated_ids = self.model.generate(input_ids, max_new_tokens=128)
+            generated_ids = generated_ids[0].to("cpu")
+            #generated_ids = generated_ids[:, input_ids.shape[-1]:]
+            generated_text =  self.tokenizer.decode(generated_ids) # [self.tokenizer.decode(gen_id, skip_special_tokens=True) for gen_id in generated_ids]
+            print(generated_text)
+            generated_text = [text.split('\n\n')[0] for text in generated_text]
+            resp.append(generated_text)
+        return resp
 
     def forward_(self, extended_prompt):
         if len(extended_prompt) > self.max_batch_size:
