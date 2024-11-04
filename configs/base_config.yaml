@@ -13,15 +13,15 @@ dataset:                                            # Dataset configuration
 load_models:                                        # Which pretrained models to load
     maskrcnn: False
     clip: False
-    glip: False
+    glip: True
     owlvit: False
     tcl: False
-    gpt3_qa: False
-    gpt3_general: False
-    depth: False
-    blip: False
+    gpt3_qa: True
+    gpt3_general: True
+    depth: True
+    blip: True
     saliency: False
-    xvlm: False
+    xvlm: True
     codex: True
     codellama: False
 
@@ -45,7 +45,7 @@ gpt3:                                               # GPT-3 configuration
     qa_prompt: ./prompts/gpt3/gpt3_qa.txt
     guess_prompt: ./prompts/gpt3/gpt3_process_guess.txt
     temperature: 0.                                 # Temperature for GPT-3. Almost deterministic if 0
-    model: text-davinci-003                         # See openai.Model.list() for available models
+    model: gpt-3.5-turbo                        # See openai.Model.list() for available models
 
 codex:
     temperature: 0.                                 # Temperature for Codex. (Almost) deterministic if 0
@@ -66,7 +66,7 @@ log_every: 20                                       # Log accuracy every n batch
 wandb: False                                        # Use Weights and Biases
 
 blip_half_precision: True                           # Use 8bit (Faster but slightly less accurate) for BLIP if True
-blip_v2_model_type: blip2-flan-t5-xxl               # Which model to use for BLIP-2
+blip_v2_model_type: blip2-flan-t5-xl               # Which model to use for BLIP-2
 
 use_fixed_code: False                               # Use a fixed code for all samples (do not generate with Codex)
 fixed_code_file: ./prompts/fixed_code/blip2.prompt  # Path to the fixed code file

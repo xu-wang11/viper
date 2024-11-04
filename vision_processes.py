@@ -176,6 +176,7 @@ else:
     for model_class_ in list_models:
         for process_name_ in model_class_.list_processes():
             if process_name_ in config.load_models and config.load_models[process_name_]:
+                print(model_class_)
                 consumers[process_name_] = make_fn(model_class_, process_name_, counter_)
                 counter_ += 1
 

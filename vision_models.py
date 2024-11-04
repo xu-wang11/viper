@@ -881,7 +881,7 @@ class GPT3Model(BaseModel):
         if self.model == 'chatgpt':
             response = [r['message']['content'] for r in response['choices']]
         else:
-            response = [r["text"] for r in response['choices']]
+            response =[r.message.content for r in response.choices] # [r["text"] for r in response['choices']]
         return response
 
     def query_gpt3(self, prompt, model="text-davinci-003", max_tokens=16, logprobs=None, stream=False,
@@ -895,9 +895,27 @@ class GPT3Model(BaseModel):
                 temperature=self.temperature,
             )
         else:
-            response = client.completions.create(
+        #     client.chat.completions.create(
+        #         # {"role": "system", "content": "You are a helpful assistant."},
+        #    model=config.codex.model,
+        #     messages=[
+        #          # {"role": "system", "content": "Only answer with a function starting def execute_command."},
+        #         system_role,
+        #         {"role": "user", "content": prompt}
+        #     ],
+        #     temperature=config.codex.temperature,
+        #     max_tokens=config.codex.max_tokens,
+        #     top_p=1.,
+        #     frequency_penalty=0,
+        #     presence_penalty=0,
+        #     #                 best_of=config.codex.best_of,
+        #     stop=["\n\n"],
+        # )
+            print(model)
+            messages = [{"role": "user", "content": p} for p in prompt]
+            response = client.chat.completions.create(
                 model=model,
-                prompt=prompt,
+                messages=messages,
                 max_tokens=max_tokens,
                 logprobs=logprobs,
                 temperature=self.temperature,
@@ -908,6 +926,7 @@ class GPT3Model(BaseModel):
                 presence_penalty=presence_penalty,
                 n=self.n_votes,
             )
+        print(response)
         return response
 
     def forward(self, prompt, process_name):
