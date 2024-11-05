@@ -5,3 +5,4 @@ dataset:
     dataset_name: 'GQA'
     data_path: '/root/Datasets/'
     split: 'testdev' 
+results_dir: ./python_chatgpt_results/
