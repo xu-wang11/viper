@@ -846,29 +846,36 @@ class GPT3Model(BaseModel):
         return response
 
     def get_qa(self, prompts, prompt_base: str = None) -> list[str]:
-        if prompt_base is None:
-            prompt_base = self.qa_prompt
-        prompts_total = []
-        for p in prompts:
-            question = p
-            prompts_total.append(prompt_base.format(question))
-        response = self.get_qa_fn(prompts_total)
-        if self.n_votes > 1:
-            response_ = []
-            for i in range(len(prompts)):
-                if self.model == 'chatgpt':
-                    resp_i = [r['message']['content'] for r in
-                              response['choices'][i * self.n_votes:(i + 1) * self.n_votes]]
-                else:
-                    resp_i = [r['text'] for r in response['choices'][i * self.n_votes:(i + 1) * self.n_votes]]
-                response_.append(self.most_frequent(resp_i))
-            response = response_
+        response = self.query_gpt3(prompts, model=self.model, max_tokens=5, top_p=1, frequency_penalty=0,
+                                   presence_penalty=0)
+        if self.model == 'chatgpt':
+            response = [r['message']['content'] for r in response['choices']]
         else:
-            if self.model == 'chatgpt':
-                response = [r['message']['content'] for r in response['choices']]
-            else:
-                response = [self.process_answer(r["text"]) for r in response['choices']]
+            response =[r.message.content for r in response.choices] # [r["text"] for r in response['choices']]
         return response
+        # if prompt_base is None:
+        #     prompt_base = self.qa_prompt
+        # prompts_total = []
+        # for p in prompts:
+        #     question = p
+        #     prompts_total.append(prompt_base.format(question))
+        # response = self.get_qa_fn(prompts_total)
+        # if self.n_votes > 1:
+        #     response_ = []
+        #     for i in range(len(prompts)):
+        #         if self.model == 'chatgpt':
+        #             resp_i = [r['message']['content'] for r in
+        #                       response['choices'][i * self.n_votes:(i + 1) * self.n_votes]]
+        #         else:
+        #             resp_i = [r['text'] for r in response['choices'][i * self.n_votes:(i + 1) * self.n_votes]]
+        #         response_.append(self.most_frequent(resp_i))
+        #     response = response_
+        # else:
+        #     if self.model == 'chatgpt':
+        #         response = [r['message']['content'] for r in response['choices']]
+        #     else:
+        #         response = [self.process_answer(r["text"]) for r in response['choices']]
+        # return response
 
     def get_qa_fn(self, prompt):
         response = self.query_gpt3(prompt, model=self.model, max_tokens=5, logprobs=1, stream=False,
